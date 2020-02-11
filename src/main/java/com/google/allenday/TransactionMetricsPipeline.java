@@ -11,6 +11,7 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.*;
 import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime;
+import org.apache.beam.sdk.transforms.windowing.FixedWindows;
 import org.apache.beam.sdk.transforms.windowing.SlidingWindows;
 import org.apache.beam.sdk.transforms.windowing.Window;
 import org.joda.time.Duration;
@@ -26,6 +27,13 @@ public class TransactionMetricsPipeline {
                 .readMessagesWithAttributes()
                 .fromTopic(options.getInputDataTopic()))
                 .apply("Deserialize JSON", ParDo.of(new DeserializeTransaction()))
+                .apply("Fixed windows", Window.into(FixedWindows.of(Duration.standardSeconds(30))))
+
+                // we have PCollection of transactions assigned to fixed windows
+                // for each window need to produce record with 4 values and timestamp
+                // {"timestamp": 1574543, "data": {"open": 3.3, "close": 3.5, "high": 3.6, "low": 0.1}}
+
+
                 .apply("Get Gas Value",
                         ParDo.of(new DoFn<EthereumTransaction, Long>() {
                             @ProcessElement
