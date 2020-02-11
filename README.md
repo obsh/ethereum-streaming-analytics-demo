@@ -22,11 +22,11 @@ java -cp target/ethereum-streaming-analytics-bundled-1.0-SNAPSHOT.jar com.google
 
 ## Replay
 
-### Replaying Ethereum transactions
+### Replaying Ethereum transactions in loop
 ```bash
 project=$(gcloud config get-value project 2> /dev/null)
 temp_resource_name=$(./get_temp_resource_name.sh)
-docker run bigquery-to-pubsub:latest \
+docker run -rm -d --restart unless-stopped bigquery-to-pubsub:latest \
   --bigquery-table bigquery-public-data.crypto_ethereum.transactions \
   --timestamp-field block_timestamp \
   --start-timestamp 2019-10-23T00:00:00 \
