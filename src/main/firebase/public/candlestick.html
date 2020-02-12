@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candlestick demo</title>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.8.1/firebase-firestore.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#available-libraries -->
+</head>
+<body>
+<script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyCRuxL33WHgy3E5zeBMke_8rlhCIrZhl4A",
+        authDomain: "ethereum-streaming-dev.firebaseapp.com",
+        databaseURL: "https://ethereum-streaming-dev.firebaseio.com",
+        projectId: "ethereum-streaming-dev",
+        storageBucket: "ethereum-streaming-dev.appspot.com",
+        messagingSenderId: "249269731739",
+        appId: "1:249269731739:web:97dd7bfaa4991d5f"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      console.log(firebase);
+      const db = firebase.firestore();
+
+      db.collection("demo_candlestick").orderBy("timestamp", "desc").limit(30)
+        .onSnapshot(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            console.log(doc.data())
+          });
+        });
+    </script>
+</body>
+</html>
