@@ -1,18 +1,15 @@
 package com.google.allenday;
 
-import com.google.allenday.calculation.MinMaxMeanFn;
-import com.google.allenday.calculation.Stats;
+import com.google.allenday.calculation.Candlestick;
+import com.google.allenday.calculation.CombineCandlestickFn;
 import com.google.allenday.firestore.DataPoint;
 import com.google.allenday.firestore.WriteDataToFirestoreDbFn;
 import com.google.allenday.input.DeserializeTransaction;
-import com.google.allenday.transaction.EthereumTransaction;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.*;
-import org.apache.beam.sdk.transforms.windowing.AfterProcessingTime;
 import org.apache.beam.sdk.transforms.windowing.FixedWindows;
-import org.apache.beam.sdk.transforms.windowing.SlidingWindows;
 import org.apache.beam.sdk.transforms.windowing.Window;
 import org.joda.time.Duration;
 
@@ -32,37 +29,19 @@ public class TransactionMetricsPipeline {
                 // we have PCollection of transactions assigned to fixed windows
                 // for each window need to produce record with 4 values and timestamp
                 // {"timestamp": 1574543, "data": {"open": 3.3, "close": 3.5, "high": 3.6, "low": 0.1}}
-
-
-                .apply("Get Gas Value",
-                        ParDo.of(new DoFn<EthereumTransaction, Long>() {
-                            @ProcessElement
-                            public void processElement(ProcessContext c) {
-                                EthereumTransaction tx = c.element();
-                                c.output(tx.getGasPrice());
-                            }
-                        }))
-                .apply(Window.<Long>into(
-                        SlidingWindows.of(Duration.standardSeconds(options.getSlidingWindowSize()))
-                                .every(Duration.standardSeconds(options.getSlidingWindowPeriod())))
-                        .triggering(
-                                AfterProcessingTime.pastFirstElementInPane()
-                                        .plusDelayOf(Duration.standardSeconds(30)))
-                        .withAllowedLateness(Duration.standardSeconds(30))
-                        .discardingFiredPanes())
-                .apply("Calculate statistic", Combine.globally(new MinMaxMeanFn()).withoutDefaults())
-                .apply("Prepare data points", ParDo.of(new DoFn<Stats, DataPoint>() {
+                .apply("Calculate statistic", Combine.globally(new CombineCandlestickFn()).withoutDefaults())
+                .apply("Prepare data points", ParDo.of(new DoFn<Candlestick, DataPoint>() {
                     @ProcessElement
                     public void processElement(ProcessContext c) {
-                        Stats stats = c.element();
+                        Candlestick candlestick = c.element();
 
-                        System.err.format("timestamp: %d, min: %d, max: %d, mean: %f\n",
-                                c.timestamp().getMillis(), stats.getMin(), stats.getMax(), stats.getMean()
+                        System.err.format("timestamp: %d, object: %s\n",
+                                c.timestamp().getMillis(), candlestick.toString()
                         );
 
                         DataPoint dataPoint = new DataPoint();
                         dataPoint.setTimestamp(c.timestamp().getMillis());
-                        dataPoint.setStats(stats);
+                        dataPoint.setCandlestick(candlestick);
 
                         c.output(dataPoint);
                     }

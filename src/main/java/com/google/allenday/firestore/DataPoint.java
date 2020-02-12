@@ -1,13 +1,13 @@
 package com.google.allenday.firestore;
 
-import com.google.allenday.calculation.Stats;
+import com.google.allenday.calculation.Candlestick;
 import org.apache.beam.sdk.coders.AvroCoder;
 import org.apache.beam.sdk.coders.DefaultCoder;
 
 @DefaultCoder(AvroCoder.class)
 public class DataPoint {
     private Long timestamp;
-    private Stats stats;
+    private Candlestick candlestick;
 
     public Long getTimestamp() {
         return timestamp;
@@ -17,11 +17,11 @@ public class DataPoint {
         this.timestamp = timestamp;
     }
 
-    public Stats getStats() {
-        return stats;
+    public Candlestick getCandlestick() {
+        return candlestick;
     }
 
-    public void setStats(Stats stats) {
-        this.stats = stats;
+    public void setCandlestick(Candlestick candlestick) {
+        this.candlestick = candlestick;
     }
 }
