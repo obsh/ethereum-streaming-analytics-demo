@@ -1,11 +1,13 @@
 package com.google.allenday.calculation;
 
 
+import com.google.allenday.input.TransactionToRow;
 import com.google.allenday.transaction.EthereumTransaction;
 import org.apache.beam.sdk.testing.PAssert;
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.apache.beam.sdk.transforms.Combine;
 import org.apache.beam.sdk.transforms.Create;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ class CombineCandlestickFnTests {
                         // close
                         getTransaction(10, 1571789348000L, 4)
                 ))
+                .apply(ParDo.of(new TransactionToRow()))
                 .apply("Combine", Combine.globally(new CombineCandlestickFn()).withoutDefaults());
 
         PAssert
@@ -51,6 +54,7 @@ class CombineCandlestickFnTests {
                         // close
                         getTransaction(5, 1571789349000L, 1)
                 ))
+                .apply(ParDo.of(new TransactionToRow()))
                 .apply("Combine", Combine.globally(new CombineCandlestickFn()).withoutDefaults());
 
         PAssert
@@ -67,6 +71,7 @@ class CombineCandlestickFnTests {
                         // open & close & low & high
                         getTransaction(1, 1571789348000L, 2)
                 ))
+                .apply(ParDo.of(new TransactionToRow()))
                 .apply("Combine", Combine.globally(new CombineCandlestickFn()).withoutDefaults());
 
         PAssert

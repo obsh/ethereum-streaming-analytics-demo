@@ -1,13 +1,12 @@
 package com.google.allenday.calculation;
 
-// generalize with Transaction interface
-import com.google.allenday.transaction.EthereumTransaction;
 import org.apache.avro.reflect.Nullable;
 import org.apache.beam.sdk.coders.AvroCoder;
 import org.apache.beam.sdk.coders.DefaultCoder;
 import org.apache.beam.sdk.transforms.Combine;
+import org.apache.beam.sdk.values.Row;
 
-public class CombineCandlestickFn extends Combine.CombineFn<EthereumTransaction, CombineCandlestickFn.Accum, Candlestick> {
+public class CombineCandlestickFn extends Combine.CombineFn<Row, CombineCandlestickFn.Accum, Candlestick> {
     @DefaultCoder(AvroCoder.class)
     static class Accum {
         @Nullable
@@ -86,11 +85,9 @@ public class CombineCandlestickFn extends Combine.CombineFn<EthereumTransaction,
     }
 
     @Override
-    public Accum addInput(Accum accum, EthereumTransaction input) {
-        // TODO: extract specifics into input class to support different types of transactions here
-        String sortKey = input.getBlockTimestamp() + "_" + input.getTransactionIndex();
-        // TODO: extract specifics into input class to support different types of transactions here
-        Long price = input.getGasPrice();
+    public Accum addInput(Accum accum, Row input) {
+        String sortKey = input.getString("sorting_key");
+        Long price = input.getInt64("price");
 
         Accum inputAccum = new Accum(
                 sortKey, sortKey, price, price, price, price

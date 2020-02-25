@@ -8,6 +8,12 @@ import org.apache.beam.sdk.options.Validation;
 
 public interface TransactionMetricsPipelineOptions extends DataflowPipelineOptions {
 
+    @Description("Input type")
+    @Default.String("ethereum")
+    String getInputType();
+
+    void setInputType(String value);
+
     @Description("GCP PubSub topic name to subscribe and read messages from")
     @Validation.Required
     String getInputDataTopic();
