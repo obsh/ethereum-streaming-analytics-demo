@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.Collections;
 
-class DeserializeTransactionTests {
+class DeserializeEthTransactionTests {
 
     @Rule
     public final transient TestPipeline testPipeline = TestPipeline.create().enableAbandonedNodeEnforcement(true);

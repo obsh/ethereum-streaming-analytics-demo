@@ -7,18 +7,25 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.joda.time.Instant;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
+import org.joda.time.format.DateTimeParser;
 import org.joda.time.format.ISODateTimeFormat;
 
 
 import java.io.IOException;
 
 public class DeserializeTimestamp extends JsonDeserializer<Long> {
+    private static final DateTimeParser msParser =
+            new DateTimeFormatterBuilder()
+                    .appendLiteral('.')
+                    .appendFractionOfSecond(3, 9)
+                    .toParser();
 
     private static final DateTimeFormatter dateTimeFormatter =
             new DateTimeFormatterBuilder()
                     .append(ISODateTimeFormat.date())
                     .appendLiteral(' ')
                     .append(ISODateTimeFormat.hourMinuteSecond())
+                    .appendOptional(msParser)
                     .appendLiteral(' ')
                     .appendTimeZoneId()
                     .toFormatter();
